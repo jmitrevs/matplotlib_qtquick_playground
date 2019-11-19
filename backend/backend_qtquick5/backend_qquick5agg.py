@@ -113,6 +113,8 @@ class FigureCanvasQtQuickAgg(QtQuick.QQuickPaintedItem, FigureCanvasAgg):
             # (bgra).
             if QtCore.QSysInfo.ByteOrder == QtCore.QSysInfo.LittleEndian:
                 # tostring_bgra does not exist anymore!?
+                # use this to have temporary running code
+                #stringBuffer = self.renderer.tostring_argb()
                 stringBuffer = self.renderer._renderer.tostring_bgra()
             else:
                 stringBuffer = self.renderer._renderer.tostring_argb()

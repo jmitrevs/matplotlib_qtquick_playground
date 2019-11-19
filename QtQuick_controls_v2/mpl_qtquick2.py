@@ -289,6 +289,11 @@ def main():
     argv.extend(["-style", "universal"])
     app = QGuiApplication(argv)
 
+    # why needed now?
+    app.setOrganizationName("Some Company")
+    app.setOrganizationDomain("somecompany.com")
+    app.setApplicationName("Amazing Application")
+
     qmlRegisterType(FigureCanvasQTAggToolbar, "Backend", 1, 0, "FigureToolbar")    
     imgProvider = MatplotlibIconProvider()
     

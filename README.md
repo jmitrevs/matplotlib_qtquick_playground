@@ -9,7 +9,11 @@ Original README.md in README_org.md
 Patches
 =======
 - backend and qml-files
--
+- Not existing tostring_bgra function in line 118 of backend_qquick5agg.py
+  
+  stringBuffer = self.renderer._renderer.tostring_bgra()
+
+  
 
 
 Requirements
