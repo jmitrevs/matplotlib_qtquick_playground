@@ -9,7 +9,7 @@ from matplotlib.backend_bases import cursors
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5 import TimerQT
 
-from matplotlib.externals import six
+import six
 
 from PyQt5 import QtCore, QtGui, QtQuick, QtWidgets
 
@@ -112,6 +112,7 @@ class FigureCanvasQtQuickAgg(QtQuick.QQuickPaintedItem, FigureCanvasAgg):
             # system is LSB first and expects the bytes in reverse order
             # (bgra).
             if QtCore.QSysInfo.ByteOrder == QtCore.QSysInfo.LittleEndian:
+                # tostring_bgra does not exist anymore!?
                 stringBuffer = self.renderer._renderer.tostring_bgra()
             else:
                 stringBuffer = self.renderer._renderer.tostring_argb()
@@ -226,7 +227,8 @@ class FigureCanvasQtQuickAgg(QtQuick.QQuickPaintedItem, FigureCanvasAgg):
         QtQuick.QQuickPaintedItem.geometryChanged(self, new_geometry, old_geometry)
         
     def hoverEnterEvent(self, event):
-        FigureCanvasAgg.enter_notify_event(self, guiEvent=event)
+        x, y = event.pos().x, event.pos().y
+        FigureCanvasAgg.enter_notify_event(self, guiEvent=event, xy=(x(), y()))
 
     def hoverLeaveEvent(self, event):
         QtWidgets.QApplication.restoreOverrideCursor()
@@ -376,16 +378,17 @@ class FigureCanvasQtQuickAgg(QtQuick.QQuickPaintedItem, FigureCanvasAgg):
         global qApp
         qApp.processEvents()
 
+    # removed _default in function name 4 times
     def start_event_loop(self, timeout):
-        FigureCanvasAgg.start_event_loop_default(self, timeout)
+        FigureCanvasAgg.start_event_loop(self, timeout)
 
     start_event_loop.__doc__ = \
-                             FigureCanvasAgg.start_event_loop_default.__doc__
+                             FigureCanvasAgg.start_event_loop.__doc__
 
     def stop_event_loop(self):
-        FigureCanvasAgg.stop_event_loop_default(self)
+        FigureCanvasAgg.stop_event_loop(self)
 
-    stop_event_loop.__doc__ = FigureCanvasAgg.stop_event_loop_default.__doc__
+    stop_event_loop.__doc__ = FigureCanvasAgg.stop_event_loop.__doc__
 
      
 class FigureQtQuickAggToolbar(FigureCanvasQtQuickAgg):
@@ -591,7 +594,7 @@ class FigureQtQuickAggToolbar(FigureCanvasQtQuickAgg):
             else:
                 artists = [a for a in event.inaxes.mouseover_set
                            if a.contains(event)]
-
+                # mouseover_set deprecation warning. How to solve?
                 if artists:
 
                     a = max(enumerate(artists), key=lambda x: x[1].zorder)[1]
