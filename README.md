@@ -24,6 +24,7 @@ The mouseover_set attribute was deprecated in Matplotlib 3.0 and will be removed
   file:///home/sietse/.local/lib/python3.7/site-packages/PyQt5/Qt/qml/QtQuick/Controls.2/Universal/RangeSlider.qml: QML QQuickRangeSliderNode: Binding loop detected for property "value"
 
 It basically works now, but when ending the program:
+
     QObject::startTimer: Timers can only be used with threads started with QThread
     QObject::startTimer: Timers can only be used with threads started with QThread
     Must construct a QGuiApplication first.
