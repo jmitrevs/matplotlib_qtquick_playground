@@ -112,10 +112,16 @@ class FigureCanvasQtQuickAgg(QtQuick.QQuickPaintedItem, FigureCanvasAgg):
             # system is LSB first and expects the bytes in reverse order
             # (bgra).
             if QtCore.QSysInfo.ByteOrder == QtCore.QSysInfo.LittleEndian:
-                # tostring_bgra does not exist anymore!?
-                # use this to have temporary running code
-                #stringBuffer = self.renderer.tostring_argb()
-                stringBuffer = self.renderer._renderer.tostring_bgra()
+                # stringBuffer = self.renderer._renderer.tostring_bgra()
+                #   tostring_bgra does not exist anymore!
+
+                # temporary patch
+                # added following patch to matplotlib/backends/backend_app.py
+                #    def tostring_bgra(self):
+                #        return np.asarray(self._renderer).take([2, 1, 0, 3], axis=2).tobytes()
+                #  _renderer is the cpp code from matplotlib/src/_backend_agg.cpp, so probably faster.
+                stringBuffer = self.renderer.tostring_bgra()
+
             else:
                 stringBuffer = self.renderer._renderer.tostring_argb()
 
@@ -596,9 +602,10 @@ class FigureQtQuickAggToolbar(FigureCanvasQtQuickAgg):
             else:
                 artists = [a for a in event.inaxes.mouseover_set
                            if a.contains(event)]
-                # mouseover_set deprecation warning. How to solve?
+                # mouseover_set deprecation warning.
+                # How to use the artists mousover?
+                #  and when is artists non-empty?
                 if artists:
-
                     a = max(enumerate(artists), key=lambda x: x[1].zorder)[1]
                     if a is not event.inaxes.patch:
                         data = a.get_cursor_data(event)
@@ -1014,5 +1021,6 @@ class FigureQtQuickAggToolbar(FigureCanvasQtQuickAgg):
         FigureCanvasAgg.print_figure(self, fname, *args, **kwargs)
         self.draw()
      
+# are these being used?
 FigureCanvasQTAgg = FigureCanvasQtQuickAgg
 FigureCanvasQTAggToolbar = FigureQtQuickAggToolbar
