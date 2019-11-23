@@ -54,7 +54,7 @@ Item {
                         messageDialog.open()
                     }
                 }
-            } 
+            }
             
             SubplotTool {
                 id: setMargin

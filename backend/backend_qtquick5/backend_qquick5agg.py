@@ -113,7 +113,7 @@ class FigureCanvasQtQuickAgg(QtQuick.QQuickPaintedItem, FigureCanvasAgg):
             # (bgra).
             if QtCore.QSysInfo.ByteOrder == QtCore.QSysInfo.LittleEndian:
                 # stringBuffer = self.renderer._renderer.tostring_bgra()
-                #   tostring_bgra does not exist anymore!
+                #   tostring_xxx do not exist anymore in _renderer
 
                 # temporary patch
                 # added following patch to matplotlib/backends/backend_app.py
@@ -121,9 +121,8 @@ class FigureCanvasQtQuickAgg(QtQuick.QQuickPaintedItem, FigureCanvasAgg):
                 #        return np.asarray(self._renderer).take([2, 1, 0, 3], axis=2).tobytes()
                 #  _renderer is the cpp code from matplotlib/src/_backend_agg.cpp, so probably faster.
                 stringBuffer = self.renderer.tostring_bgra()
-
             else:
-                stringBuffer = self.renderer._renderer.tostring_argb()
+                stringBuffer = self.renderer.tostring_argb()
 
             refcnt = sys.getrefcount(stringBuffer)
 
@@ -604,8 +603,8 @@ class FigureQtQuickAggToolbar(FigureCanvasQtQuickAgg):
                            if a.contains(event)]
                 # mouseover_set deprecation warning.
                 # How to use the artists mousover?
-                #  and when is artists non-empty?
                 if artists:
+                    print(f'We now need to look add mouseover_set')
                     a = max(enumerate(artists), key=lambda x: x[1].zorder)[1]
                     if a is not event.inaxes.patch:
                         data = a.get_cursor_data(event)
