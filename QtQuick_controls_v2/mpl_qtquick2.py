@@ -167,6 +167,7 @@ class Form(QObject):
         self._figure = fig
         self._figure.set_facecolor('white')
         self.axes = self.figure.add_subplot(111)    
+        # self.axes.spines['left'].set_color('blue')
         
         # Signal connection
         self.xFromChanged.connect(self._figure.canvas.draw_idle)

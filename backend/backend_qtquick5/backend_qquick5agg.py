@@ -3,6 +3,8 @@ import os
 import sys
 import traceback    
 
+import numpy as np
+
 import matplotlib
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.backend_bases import cursors
@@ -115,12 +117,11 @@ class FigureCanvasQtQuickAgg(QtQuick.QQuickPaintedItem, FigureCanvasAgg):
                 # stringBuffer = self.renderer._renderer.tostring_bgra()
                 #   tostring_xxx do not exist anymore in _renderer
 
-                # temporary patch
-                # added following patch to matplotlib/backends/backend_app.py
-                #    def tostring_bgra(self):
-                #        return np.asarray(self._renderer).take([2, 1, 0, 3], axis=2).tobytes()
-                #  _renderer is the cpp code from matplotlib/src/_backend_agg.cpp, so probably faster.
-                stringBuffer = self.renderer.tostring_bgra()
+                # patch
+                #  Change QImage format to RGBA8888
+                #    now no conversion needed
+                #    And with bigendian?
+                stringBuffer = np.asarray(self.renderer._renderer).tobytes()
             else:
                 stringBuffer = self.renderer.tostring_argb()
 
@@ -129,7 +130,7 @@ class FigureCanvasQtQuickAgg(QtQuick.QQuickPaintedItem, FigureCanvasAgg):
             # convert the Agg rendered image -> qImage
             qImage = QtGui.QImage(stringBuffer, self.renderer.width,
                                   self.renderer.height,
-                                  QtGui.QImage.Format_ARGB32)
+                                  QtGui.QImage.Format_RGBA8888)
             # get the rectangle for the image
             rect = qImage.rect()
             # p = QtGui.QPainter(self)
@@ -153,7 +154,7 @@ class FigureCanvasQtQuickAgg(QtQuick.QQuickPaintedItem, FigureCanvasAgg):
             reg = self.copy_from_bbox(bbox)
             stringBuffer = reg.to_string_argb()
             qImage = QtGui.QImage(stringBuffer, w, h,
-                                  QtGui.QImage.Format_ARGB32)
+                                  QtGui.QImage.Format_RGBA8888)
 
             pixmap = QtGui.QPixmap.fromImage(qImage)
             p.drawPixmap(QtCore.QPoint(l, self.renderer.height-t), pixmap)
@@ -604,7 +605,7 @@ class FigureQtQuickAggToolbar(FigureCanvasQtQuickAgg):
                 # mouseover_set deprecation warning.
                 # How to use the artists mousover?
                 if artists:
-                    print(f'We now need to look add mouseover_set')
+                    print(f'We now need to look at mouseover_set')
                     a = max(enumerate(artists), key=lambda x: x[1].zorder)[1]
                     if a is not event.inaxes.patch:
                         data = a.get_cursor_data(event)
