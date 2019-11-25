@@ -11,8 +11,11 @@ Notes
 
 - backend and qml-files updated
 - Not existing tostring_bgra function in line 118 of backend_qquick5agg.py
+
        stringBuffer = self.renderer._renderer.tostring_bgra()
+
   Changed QImage format to RGBA8888 and then
+
        stringBuffer = np.asarray(self.renderer._renderer).tobytes()
 
 Console output:
