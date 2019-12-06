@@ -122,6 +122,7 @@ class DataSeriesModel(QAbstractListModel):
         return QVariant()
     
     def setData(self, index, value, role=Qt.EditRole):
+        value = not value
         if(index.row() < 0 or index.row() >= len(self._data_series)):
             return False
         
