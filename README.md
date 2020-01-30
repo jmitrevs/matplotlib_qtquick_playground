@@ -1,47 +1,46 @@
 # matplotlib_qtquick_playground
-Port of the example kindly provided by Eli Bendersky to PyQt5:
-https://github.com/eliben/code-for-blog/tree/master/2009/pyqt_dataplot_demo
 
-Derivation of the example have been made based on the three following Qt technologies:
-- QtWidgets
-- QtQuick Controls 1.0
-- QtQuick Controls 2.0 (actually Qt.labs.controls 1.0 as I used PyQt 5.6)
+An updated version of the original.
+Updated to qt 5.13.2, only the backend and QtQuick version 2 part.
 
-The goal of this work was to play around with QtQuick and PyQt5. The integration of matplotlib with QtWidgets is the best
-as a backend support full interactivity and navigation toolbar. A new matplotlib backend based on a QQuickItem has been
-created to restore maximal interactivity.
+Original README.md in README_org.md
 
-The logic behind QtWidgets GUI and QtQuick is quite different. For example, in the former, the Python script takes care of
-reading all widgets before updating the figure. But in the latter, QtQuick controls are binded to Python properties that 
-emit signal forcing the figure to update.
 
-## QtWidgets version
+Notes
+=======
 
-![QtWidgets version](./QtWidgets/QtWidgets_UI.PNG)
+- backend and qml-files updated
+- Not existing tostring_bgra function in line 118 of backend_qquick5agg.py
 
-## QtQuick Controls 1.0 version
+       stringBuffer = self.renderer._renderer.tostring_bgra()
 
-![QtQuick Controls 1.0 version](./QtQuick_controls_v1/QtQuickControls1.PNG)
+  Changed QImage format to RGBA8888 and then
 
-## QtQuick Controls 2.0 version
+       stringBuffer = np.asarray(self.renderer._renderer).tobytes()
 
-![QtQuick Controls 2.0 version](./QtQuick_controls_v2/QtQuickControls2.PNG)
+Console output:
 
-Code functions
-==============
+The mouseover_set attribute was deprecated in Matplotlib 3.0 and will be removed in 3.2.
 
-Series of data are loaded from a .csv file, and their names are
-displayed in a checkable list view. The user can select the series
-it wants from the list and plot them on a matplotlib canvas.
-Use the sample .csv file that comes with the scripts for an example
-of data series.
+  artists = [a for a in event.inaxes.mouseover_set
+
+  file:///home/sietse/.local/lib/python3.7/site-packages/PyQt5/Qt/qml/QtQuick/Controls.2/Universal/RangeSlider.qml: QML QQuickRangeSliderNode: Binding loop detected for property "value"
+
+It basically works now, but when ending the program:
+
+    QObject::startTimer: Timers can only be used with threads started with QThread
+    QObject::startTimer: Timers can only be used with threads started with QThread
+    Must construct a QGuiApplication first.
+    Segmentation fault
+
+
 
 Requirements
 ============
 
-* Python >= 3.5
-* PyQt = 5.6 (if you plan to use PyQt 5.7, references have changed as QtQuick.Controls 2.0 have integrated the official library)
-* matplolib >= 1.4
+* Python >= 3.7
+* PyQt = 5.13
+* matplolib >= 3
 
 License
 =======

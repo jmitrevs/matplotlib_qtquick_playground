@@ -122,6 +122,7 @@ class DataSeriesModel(QAbstractListModel):
         return QVariant()
     
     def setData(self, index, value, role=Qt.EditRole):
+        value = not value
         if(index.row() < 0 or index.row() >= len(self._data_series)):
             return False
         
@@ -167,6 +168,7 @@ class Form(QObject):
         self._figure = fig
         self._figure.set_facecolor('white')
         self.axes = self.figure.add_subplot(111)    
+        # self.axes.spines['left'].set_color('blue')
         
         # Signal connection
         self.xFromChanged.connect(self._figure.canvas.draw_idle)
@@ -288,6 +290,11 @@ def main():
     # Trick to set the style / not found how to do it in pythonic way
     argv.extend(["-style", "universal"])
     app = QGuiApplication(argv)
+
+    # why needed now?
+    app.setOrganizationName("Some Company")
+    app.setOrganizationDomain("somecompany.com")
+    app.setApplicationName("Amazing Application")
 
     qmlRegisterType(FigureCanvasQTAggToolbar, "Backend", 1, 0, "FigureToolbar")    
     imgProvider = MatplotlibIconProvider()

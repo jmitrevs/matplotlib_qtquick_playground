@@ -3,13 +3,15 @@ import os
 import sys
 import traceback    
 
+import numpy as np
+
 import matplotlib
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.backend_bases import cursors
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5 import TimerQT
 
-from matplotlib.externals import six
+import six
 
 from PyQt5 import QtCore, QtGui, QtQuick, QtWidgets
 
@@ -112,16 +114,23 @@ class FigureCanvasQtQuickAgg(QtQuick.QQuickPaintedItem, FigureCanvasAgg):
             # system is LSB first and expects the bytes in reverse order
             # (bgra).
             if QtCore.QSysInfo.ByteOrder == QtCore.QSysInfo.LittleEndian:
-                stringBuffer = self.renderer._renderer.tostring_bgra()
+                # stringBuffer = self.renderer._renderer.tostring_bgra()
+                #   tostring_xxx do not exist anymore in _renderer
+
+                # patch
+                #  Change QImage format to RGBA8888
+                #    now no conversion needed
+                #    And with bigendian?
+                stringBuffer = np.asarray(self.renderer._renderer).tobytes()
             else:
-                stringBuffer = self.renderer._renderer.tostring_argb()
+                stringBuffer = self.renderer.tostring_argb()
 
             refcnt = sys.getrefcount(stringBuffer)
 
             # convert the Agg rendered image -> qImage
             qImage = QtGui.QImage(stringBuffer, self.renderer.width,
                                   self.renderer.height,
-                                  QtGui.QImage.Format_ARGB32)
+                                  QtGui.QImage.Format_RGBA8888)
             # get the rectangle for the image
             rect = qImage.rect()
             # p = QtGui.QPainter(self)
@@ -145,7 +154,7 @@ class FigureCanvasQtQuickAgg(QtQuick.QQuickPaintedItem, FigureCanvasAgg):
             reg = self.copy_from_bbox(bbox)
             stringBuffer = reg.to_string_argb()
             qImage = QtGui.QImage(stringBuffer, w, h,
-                                  QtGui.QImage.Format_ARGB32)
+                                  QtGui.QImage.Format_RGBA8888)
 
             pixmap = QtGui.QPixmap.fromImage(qImage)
             p.drawPixmap(QtCore.QPoint(l, self.renderer.height-t), pixmap)
@@ -226,7 +235,8 @@ class FigureCanvasQtQuickAgg(QtQuick.QQuickPaintedItem, FigureCanvasAgg):
         QtQuick.QQuickPaintedItem.geometryChanged(self, new_geometry, old_geometry)
         
     def hoverEnterEvent(self, event):
-        FigureCanvasAgg.enter_notify_event(self, guiEvent=event)
+        x, y = event.pos().x, event.pos().y
+        FigureCanvasAgg.enter_notify_event(self, guiEvent=event, xy=(x(), y()))
 
     def hoverLeaveEvent(self, event):
         QtWidgets.QApplication.restoreOverrideCursor()
@@ -376,16 +386,17 @@ class FigureCanvasQtQuickAgg(QtQuick.QQuickPaintedItem, FigureCanvasAgg):
         global qApp
         qApp.processEvents()
 
+    # removed _default in function name 4 times
     def start_event_loop(self, timeout):
-        FigureCanvasAgg.start_event_loop_default(self, timeout)
+        FigureCanvasAgg.start_event_loop(self, timeout)
 
     start_event_loop.__doc__ = \
-                             FigureCanvasAgg.start_event_loop_default.__doc__
+                             FigureCanvasAgg.start_event_loop.__doc__
 
     def stop_event_loop(self):
-        FigureCanvasAgg.stop_event_loop_default(self)
+        FigureCanvasAgg.stop_event_loop(self)
 
-    stop_event_loop.__doc__ = FigureCanvasAgg.stop_event_loop_default.__doc__
+    stop_event_loop.__doc__ = FigureCanvasAgg.stop_event_loop.__doc__
 
      
 class FigureQtQuickAggToolbar(FigureCanvasQtQuickAgg):
@@ -591,9 +602,10 @@ class FigureQtQuickAggToolbar(FigureCanvasQtQuickAgg):
             else:
                 artists = [a for a in event.inaxes.mouseover_set
                            if a.contains(event)]
-
+                # mouseover_set deprecation warning.
+                # How to use the artists mousover?
                 if artists:
-
+                    print(f'We now need to look at mouseover_set')
                     a = max(enumerate(artists), key=lambda x: x[1].zorder)[1]
                     if a is not event.inaxes.patch:
                         data = a.get_cursor_data(event)
@@ -1009,5 +1021,6 @@ class FigureQtQuickAggToolbar(FigureCanvasQtQuickAgg):
         FigureCanvasAgg.print_figure(self, fname, *args, **kwargs)
         self.draw()
      
+# are these being used?
 FigureCanvasQTAgg = FigureCanvasQtQuickAgg
 FigureCanvasQTAggToolbar = FigureQtQuickAggToolbar

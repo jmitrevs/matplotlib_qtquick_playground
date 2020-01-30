@@ -1,10 +1,10 @@
-import QtQuick 2.6
-import Qt.labs.controls 1.0
-import QtQuick.Dialogs 1.2
-import QtQuick.Layouts 1.0
-import QtQuick.Window 2.1
-import Qt.labs.controls.material 1.0
-import Qt.labs.controls.universal 1.0
+import QtQuick 2.13
+import QtQuick.Dialogs 1.3
+import QtQuick.Layouts 1.13
+import QtQuick.Window 2.12
+import QtQuick.Controls 2.12
+import QtQuick.Controls.Material 2.12
+import QtQuick.Controls.Universal 2.12
 
 ApplicationWindow {
     id: root
@@ -65,7 +65,7 @@ ApplicationWindow {
                 Layout.fillWidth: true
             }
         }
-    }    
+    }
 
     MainForm {
         id: mainView
@@ -74,7 +74,7 @@ ApplicationWindow {
         
         transform: [
             Scale {
-                id: scale; 
+                id: scale;
                 xScale: yScale;
                 yScale: Math.min(root.width/mainView.width,
                                  (root.height-head.height-foot.height)/mainView.height);
