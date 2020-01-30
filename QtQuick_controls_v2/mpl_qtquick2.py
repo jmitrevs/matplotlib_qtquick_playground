@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 Series of data are loaded from a .csv file, and their names are
 displayed in a checkable list view. The user can select the series
@@ -18,11 +19,11 @@ License: MIT License
 Last modified: 2016-11-06
 """
 import sys, os, csv
-from PyQt5.QtCore import QAbstractListModel, QModelIndex, QObject, QSize, Qt, QUrl, QVariant, pyqtProperty, pyqtSlot, pyqtSignal
-from PyQt5.QtGui import QGuiApplication, QColor, QImage, QPixmap
-# from PyQt5.QtWidgets import QApplication
-from PyQt5.QtQml import QQmlApplicationEngine, qmlRegisterType
-from PyQt5.QtQuick import QQuickImageProvider
+from PySide2.QtCore import QAbstractListModel, QModelIndex, QObject, QSize, Qt, QUrl, Property, Slot, Signal
+from PySide2.QtGui import QGuiApplication, QColor, QImage, QPixmap
+# from PySide2.QtWidgets import QApplication
+from PySide2.QtQml import QQmlApplicationEngine, qmlRegisterType
+from PySide2.QtQuick import QQuickImageProvider
 
 import matplotlib
 matplotlib.use('Agg')
@@ -65,7 +66,7 @@ class DataSeriesModel(QAbstractListModel):
         DataRole : b"data"
     }
     
-    lengthDataChanged = pyqtSignal()
+    lengthDataChanged = Signal()
     
     def __init__(self, parent=None):
         QAbstractListModel.__init__(self, parent)
@@ -73,7 +74,7 @@ class DataSeriesModel(QAbstractListModel):
         self._data_series = list()
         self._length_data = 0
     
-    @pyqtProperty(int, notify=lengthDataChanged)
+    @Property(int, notify=lengthDataChanged)
     def lengthData(self):
         return self._length_data
     
@@ -137,11 +138,11 @@ class DataSeriesModel(QAbstractListModel):
                     
 class Form(QObject):
 
-    xFromChanged = pyqtSignal()
-    xToChanged = pyqtSignal()
-    legendChanged = pyqtSignal()
-    statusTextChanged = pyqtSignal()
-    stateChanged = pyqtSignal()
+    xFromChanged = Signal()
+    xToChanged = Signal()
+    legendChanged = Signal()
+    statusTextChanged = Signal()
+    stateChanged = Signal()
 
     def __init__(self, parent=None, data=None):
         QObject.__init__(self, parent)
@@ -176,7 +177,7 @@ class Form(QObject):
         self.legendChanged.connect(self._figure.canvas.draw_idle)
         self.stateChanged.connect(self._figure.canvas.draw_idle)
         
-    @pyqtProperty('QString', notify=statusTextChanged)
+    @Property('QString', notify=statusTextChanged)
     def statusText(self):
         return self._status_text
     
@@ -186,7 +187,7 @@ class Form(QObject):
             self._status_text = text
             self.statusTextChanged.emit()
 
-    @pyqtProperty('QString')
+    @Property('QString')
     def filename(self):
         return self._filename
     
@@ -201,7 +202,7 @@ class Form(QObject):
                 self.xTo = self._data.lengthData
                 self.update_figure()
 
-    @pyqtProperty(int, notify=xFromChanged)
+    @Property(int, notify=xFromChanged)
     def xFrom(self):
         return self._x_from
     
@@ -216,7 +217,7 @@ class Form(QObject):
             self.axes.set_xlim(left=self._x_from)
             self.xFromChanged.emit()
         
-    @pyqtProperty(int, notify=xToChanged)
+    @Property(int, notify=xToChanged)
     def xTo(self):
         return self._x_to
     
@@ -231,7 +232,7 @@ class Form(QObject):
             self.axes.set_xlim(right=self._x_to)
             self.xToChanged.emit()
         
-    @pyqtProperty(bool, notify=legendChanged)
+    @Property(bool, notify=legendChanged)
     def legend(self):
         return self._legend
     
@@ -250,13 +251,13 @@ class Form(QObject):
                     leg.remove()
             self.legendChanged.emit()
     
-    @pyqtProperty('QString', constant=True)
+    @Property('QString', constant=True)
     def about(self):
         msg = __doc__
         return msg.strip()
         
     
-    @pyqtSlot()
+    @Slot()
     def update_figure(self):
         if self.figure is None:
             return
@@ -309,12 +310,13 @@ def main():
     context.setContextProperty("dataModel", data_model)
     mainApp = Form(data=data_model)
     context.setContextProperty("draw_mpl", mainApp)
-    
+
+
     engine.load(QUrl('main.qml'))
     
     win = engine.rootObjects()[0]
     mainApp.figure = win.findChild(QObject, "figure").getFigure()
-    
+
     rc = app.exec_()
     # There is some trouble arising when deleting all the objects here
     # but I have not figure out how to solve the error message.
